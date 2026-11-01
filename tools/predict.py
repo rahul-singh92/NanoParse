@@ -3,9 +3,7 @@ import json
 from pathlib import Path
 
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
-
-ROOT = Path(__file__).resolve().parent.parent
+from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
 
 
 def main():
@@ -13,9 +11,16 @@ def main():
     parser.add_argument("--model-dir", required=True)
     parser.add_argument("--output", default="predictions.jsonl")
     parser.add_argument("--validation", default="data/validation.jsonl")
+    parser.add_argument(
+        "--random-init",
+        action="store_true",
+        help="Initialize random model weights instead of loading trained weights",
+    )
     args = parser.parse_args()
 
+    torch.manual_seed(42)
     model_dir = Path(args.model_dir)
+
     records = [
         json.loads(line)
         for line in Path(args.validation).read_text().splitlines()
@@ -25,11 +30,22 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained(
         str(model_dir), local_files_only=True
     )
-    model = AutoModelForCausalLM.from_pretrained(
-        str(model_dir),
-        local_files_only=True,
-        dtype=torch.float32,
-    )
+
+    if args.random_init:
+        config = AutoConfig.from_pretrained(
+            str(model_dir), local_files_only=True
+        )
+        model = AutoModelForCausalLM.from_config(
+            config, dtype=torch.float32
+        )
+        print("Using randomly initialized, untrained model", flush=True)
+    else:
+        model = AutoModelForCausalLM.from_pretrained(
+            str(model_dir),
+            local_files_only=True,
+            dtype=torch.float32,
+        )
+
     model.to("cpu")
     model.eval()
 
