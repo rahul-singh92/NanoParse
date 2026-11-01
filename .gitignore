@@ -32,3 +32,10 @@ checkpoints/
 build/
 dist/
 *.egg-info/
+
+# Extracted model weights
+training/output/
+
+# Model binaries (stored in SeaweedFS and GitHub Releases)
+models/*.tar.gz
+training/output/
