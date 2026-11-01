@@ -1,0 +1,22 @@
+apiVersion: k3d.io/v1alpha5 #version of k3d 
+kind: Simple # type of configuration: simple(for simple task require 1 cluster) or complex (for heavy multiple cluster communiccation etc)
+metadata:
+    name: nanoParse-cluster # our cluster name
+
+# Kubernetes nodes
+servers: 1
+agents: 0 # additional worker nodes 
+
+ports: # map a host port to the cluster load balancer
+    - port: 8080:80
+      nodeFilters: # specifie which k3d components recieves the port mapping
+        - loadbalancer
+
+options:
+    k3d:
+        wait: true # wait until the cluster is ready
+        timeout: "300s"
+
+    kubeconfig: 
+        updateDefaultKubeconfig: true
+        switchCurrentContext: true #makes our new cluster the active kubectl context
