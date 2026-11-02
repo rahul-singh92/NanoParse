@@ -130,6 +130,7 @@ def train():
     parser.add_argument("--subset", type=int, default=0)
     parser.add_argument("--version", default="v1")
     parser.add_argument("--seed", type=int, default=None)
+    parser.add_argument("--data", type=str, default=None)
     args = parser.parse_args()
 
     config = load_config()
@@ -139,6 +140,9 @@ def train():
     device = torch.device("cpu")
 
     print("Loading training records...")
+    if args.data:
+        config["train_file"] = args.data
+
     records = load_records(config, args.subset)
     print(f"Records loaded: {len(records)}")
 
